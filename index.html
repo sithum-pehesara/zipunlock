@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ZipUnlock — ZIP &amp; RAR Password Recovery</title>
+  <meta name="description" content="Client-side ZIP &amp; RAR password recovery tool. Supports ZipCrypto, WinZip AES, RAR3, and RAR5 encryption. Works entirely in your browser — no files are uploaded." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- Animated background orbs -->
+  <div class="bg-orb orb-1" aria-hidden="true"></div>
+  <div class="bg-orb orb-2" aria-hidden="true"></div>
+  <div class="bg-orb orb-3" aria-hidden="true"></div>
+
+  <div class="app-shell">
+
+    <!-- ── Header ─────────────────────────────────────────────── -->
+    <header class="app-header" role="banner">
+      <div class="logo" aria-label="ZipUnlock logo">
+        <div class="logo-icon" aria-hidden="true">
+          <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+            <rect x="3" y="12" width="22" height="14" rx="3" fill="url(#g1)" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>
+            <path d="M9 12V8a5 5 0 0 1 10 0v4" stroke="url(#g2)" stroke-width="2.5" stroke-linecap="round"/>
+            <circle cx="14" cy="19" r="2.5" fill="white" fill-opacity="0.9"/>
+            <line x1="14" y1="21.5" x2="14" y2="24" stroke="white" stroke-opacity="0.9" stroke-width="2" stroke-linecap="round"/>
+            <defs>
+              <linearGradient id="g1" x1="3" y1="12" x2="25" y2="26" gradientUnits="userSpaceOnUse">
+                <stop stop-color="#a855f7"/>
+                <stop offset="1" stop-color="#6366f1"/>
+              </linearGradient>
+              <linearGradient id="g2" x1="9" y1="4" x2="19" y2="12" gradientUnits="userSpaceOnUse">
+                <stop stop-color="#c084fc"/>
+                <stop offset="1" stop-color="#818cf8"/>
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+        <span class="logo-text">ZipUnlock</span>
+      </div>
+      <div class="header-badge" role="note" aria-label="Runs entirely in browser">
+        <span class="badge-dot" aria-hidden="true"></span>
+        100% Client-Side — No Upload
+      </div>
+    </header>
+
+    <main class="main-content" role="main">
+
+      <!-- ── Hero ────────────────────────────────────────────────── -->
+      <section class="hero" aria-labelledby="hero-title">
+        <h1 id="hero-title" class="hero-title">
+        Archive Password <span class="gradient-text">Recovery</span>
+      </h1>
+      <p class="hero-subtitle">
+        Drop your encrypted <strong>ZIP</strong> or <strong>RAR</strong> file, choose an attack mode, and recover the password entirely in your browser — nothing leaves your device.
+      </p>
+      </section>
+
+      <!-- ── Workflow Cards ──────────────────────────────────────── -->
+      <div class="workflow">
+
+        <!-- STEP 1 — File Drop -->
+        <section class="card step-card" id="step-file" aria-labelledby="step1-title">
+          <div class="step-badge" aria-label="Step 1">1</div>
+          <h2 id="step1-title" class="card-title">Load Encrypted Archive</h2>
+
+          <div
+            id="drop-zone"
+            class="drop-zone"
+            role="button"
+            tabindex="0"
+            aria-label="Drop ZIP or RAR file here or click to browse"
+            aria-describedby="drop-hint"
+          >
+            <div class="drop-icon" aria-hidden="true">
+              <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+                <circle cx="24" cy="24" r="23" stroke="url(#dg)" stroke-width="1.5" stroke-dasharray="4 3"/>
+                <path d="M24 32V18M18 24l6-6 6 6" stroke="url(#dg2)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                <rect x="15" y="33" width="18" height="3" rx="1.5" fill="url(#dg2)" fill-opacity="0.5"/>
+                <defs>
+                  <linearGradient id="dg" x1="1" y1="1" x2="47" y2="47" gradientUnits="userSpaceOnUse">
+                    <stop stop-color="#a855f7"/>
+                    <stop offset="1" stop-color="#6366f1"/>
+                  </linearGradient>
+                  <linearGradient id="dg2" x1="15" y1="18" x2="33" y2="36" gradientUnits="userSpaceOnUse">
+                    <stop stop-color="#c084fc"/>
+                    <stop offset="1" stop-color="#818cf8"/>
+                  </linearGradient>
+                </defs>
+              </svg>
+            </div>
+            <p class="drop-primary">Drop your ZIP or RAR file here</p>
+            <p id="drop-hint" class="drop-secondary">or <span class="link-text">browse to select</span></p>
+            <input
+              id="file-input"
+              type="file"
+              accept=".zip,.rar,application/zip,application/x-zip-compressed,application/vnd.rar,application/x-rar-compressed"
+              class="visually-hidden"
+              aria-label="Select ZIP or RAR file"
+            />
+          </div>
+
+          <!-- File info panel (hidden until file loaded) -->
+          <div id="file-info" class="file-info hidden" role="status" aria-live="polite">
+            <div class="file-info-icon" aria-hidden="true">📦</div>
+            <div class="file-info-details">
+              <span id="file-name" class="file-info-name"></span>
+              <span id="file-size" class="file-info-size"></span>
+            </div>
+            <div id="enc-badge" class="enc-badge" aria-label="Encryption type"></div>
+          </div>
+
+          <!-- Error message -->
+          <div id="parse-error" class="alert alert-error hidden" role="alert" aria-live="assertive"></div>
+        </section>
+
+        <!-- STEP 2 — Attack Config -->
+        <section class="card step-card" id="step-config" aria-labelledby="step2-title">
+          <div class="step-badge" aria-label="Step 2">2</div>
+          <h2 id="step2-title" class="card-title">Configure Attack</h2>
+
+          <!-- Mode tabs -->
+          <div class="tab-row" role="tablist" aria-label="Attack mode">
+            <button
+              id="tab-dict"
+              class="tab-btn tab-active"
+              role="tab"
+              aria-selected="true"
+              aria-controls="panel-dict"
+            >Dictionary</button>
+            <button
+              id="tab-mask"
+              class="tab-btn"
+              role="tab"
+              aria-selected="false"
+              aria-controls="panel-mask"
+            >Mask / Brute-Force</button>
+          </div>
+
+          <!-- Dictionary panel -->
+          <div id="panel-dict" class="tab-panel" role="tabpanel" aria-labelledby="tab-dict">
+            <label class="field-label" for="dict-textarea">Password List</label>
+            <textarea
+              id="dict-textarea"
+              class="mono-textarea"
+              rows="7"
+              placeholder="Enter one password per line…&#10;password123&#10;admin&#10;12345&#10;qwerty"
+              aria-describedby="dict-hint"
+              spellcheck="false"
+            ></textarea>
+            <p id="dict-hint" class="field-hint">
+              Paste your wordlist — one candidate per line.
+              <span id="dict-count" class="count-badge">0 words</span>
+            </p>
+
+            <div class="or-divider" aria-hidden="true"><span>or load a file</span></div>
+
+            <label class="upload-btn" for="wordlist-input" aria-label="Upload wordlist file">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                <path d="M8 11V3M4 7l4-4 4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                <path d="M2 13h12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+              </svg>
+              Upload Wordlist (.txt)
+              <input id="wordlist-input" type="file" accept=".txt,text/plain" class="visually-hidden" aria-label="Select wordlist text file"/>
+            </label>
+          </div>
+
+          <!-- Mask panel -->
+          <div id="panel-mask" class="tab-panel hidden" role="tabpanel" aria-labelledby="tab-mask">
+
+            <div class="field-group">
+              <label class="field-label" for="mask-charset">Character Set</label>
+              <div class="checkbox-grid" role="group" aria-label="Character sets to include">
+                <label class="checkbox-label">
+                  <input type="checkbox" id="cs-lower" checked aria-label="Lowercase letters a-z"/> a–z
+                </label>
+                <label class="checkbox-label">
+                  <input type="checkbox" id="cs-upper" aria-label="Uppercase letters A-Z"/> A–Z
+                </label>
+                <label class="checkbox-label">
+                  <input type="checkbox" id="cs-digits" checked aria-label="Digits 0-9"/> 0–9
+                </label>
+                <label class="checkbox-label">
+                  <input type="checkbox" id="cs-special" aria-label="Special characters"/> !@#…
+                </label>
+              </div>
+
+              <label class="field-label" for="custom-chars">Custom Characters (optional)</label>
+              <input
+                id="custom-chars"
+                type="text"
+                class="text-input"
+                placeholder="e.g.  _-. "
+                aria-describedby="custom-chars-hint"
+                spellcheck="false"
+              />
+              <p id="custom-chars-hint" class="field-hint">Additional characters to include in the charset.</p>
+            </div>
+
+            <div class="range-row">
+              <div class="range-group">
+                <label class="field-label" for="min-len">Min Length</label>
+                <input id="min-len" type="number" class="num-input" value="1" min="1" max="12" aria-label="Minimum password length"/>
+              </div>
+              <div class="range-sep" aria-hidden="true">—</div>
+              <div class="range-group">
+                <label class="field-label" for="max-len">Max Length</label>
+                <input id="max-len" type="number" class="num-input" value="4" min="1" max="12" aria-label="Maximum password length"/>
+              </div>
+            </div>
+
+            <div id="mask-estimate" class="estimate-box" role="status" aria-live="polite">
+              <span id="est-count">—</span> combinations to test
+            </div>
+          </div>
+
+          <!-- Worker count -->
+          <div class="field-group mt-4">
+            <label class="field-label" for="worker-count">
+              Parallel Workers
+              <span class="field-hint-inline" aria-label="Recommended based on CPU cores">(recommended: <span id="rec-workers">4</span>)</span>
+            </label>
+            <div class="slider-row">
+              <input
+                id="worker-count"
+                type="range"
+                min="1"
+                max="16"
+                value="4"
+                class="range-slider"
+                aria-valuemin="1"
+                aria-valuemax="16"
+                aria-valuenow="4"
+                aria-label="Number of parallel workers"
+              />
+              <span id="worker-val" class="slider-val" aria-live="polite">4</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- STEP 3 — Run & Monitor -->
+        <section class="card step-card" id="step-run" aria-labelledby="step3-title">
+          <div class="step-badge" aria-label="Step 3">3</div>
+          <h2 id="step3-title" class="card-title">Run &amp; Monitor</h2>
+
+          <button id="start-btn" class="primary-btn" disabled aria-label="Start password recovery">
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+              <circle cx="9" cy="9" r="8" stroke="currentColor" stroke-width="1.5"/>
+              <path d="M7 6l5 3-5 3V6z" fill="currentColor"/>
+            </svg>
+            Start Recovery
+          </button>
+
+          <button id="stop-btn" class="danger-btn hidden" aria-label="Stop password recovery">
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+              <circle cx="9" cy="9" r="8" stroke="currentColor" stroke-width="1.5"/>
+              <rect x="6" y="6" width="6" height="6" rx="1" fill="currentColor"/>
+            </svg>
+            Stop
+          </button>
+
+          <!-- Progress area -->
+          <div id="progress-area" class="progress-area hidden" aria-live="polite" role="region" aria-label="Recovery progress">
+
+            <div class="stat-grid">
+              <div class="stat-card" aria-label="Hash rate">
+                <span class="stat-value" id="stat-rate">0</span>
+                <span class="stat-label">hashes/sec</span>
+              </div>
+              <div class="stat-card" aria-label="Passwords tested">
+                <span class="stat-value" id="stat-tested">0</span>
+                <span class="stat-label">tested</span>
+              </div>
+              <div class="stat-card" aria-label="Elapsed time">
+                <span class="stat-value" id="stat-time">0s</span>
+                <span class="stat-label">elapsed</span>
+              </div>
+              <div class="stat-card" aria-label="Workers active">
+                <span class="stat-value" id="stat-workers">0</span>
+                <span class="stat-label">workers</span>
+              </div>
+            </div>
+
+            <div class="progress-bar-wrap" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="Progress">
+              <div id="progress-bar" class="progress-bar"></div>
+              <span id="progress-pct" class="progress-pct">0%</span>
+            </div>
+
+            <div id="current-testing" class="current-testing">
+              <span class="current-label">Testing:</span>
+              <span id="current-candidate" class="current-candidate mono">—</span>
+            </div>
+          </div>
+
+          <!-- Result area -->
+          <div id="result-area" class="result-area hidden" role="status" aria-live="assertive"></div>
+        </section>
+
+      </div><!-- /.workflow -->
+
+    </main>
+
+    <footer class="app-footer" role="contentinfo">
+      <p>ZipUnlock · All computation happens locally · No data is transmitted · Supports ZipCrypto, WinZip AES-128/192/256, RAR3 AES-128, RAR5 AES-256</p>
+    </footer>
+
+  </div><!-- /.app-shell -->
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>
